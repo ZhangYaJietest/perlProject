@@ -5,7 +5,9 @@ use lib "C:/Users/142587/PycharmProjects/perlProject/Model/";
 use DBI;
 use Judge;
 use Variable::DBSql;
-use Model;
+use SERVER;
+use STORAGE;
+use OPERATION;
 sub new{
     my $class = shift;
     my $ref={};
@@ -31,18 +33,19 @@ sub conn {
 sub create {
     my $self = shift;
     my $dbh = $self->{"DB"};
-    my $o_model= Model->new;
+    my $o_model= SERVER->new;
+    my $o_storage = STORAGE->new;
+    my $o_operation = OPERATION->new;
 
     my $s_sql_server = $o_model->createSERVER;
     $dbh->prepare( $s_sql_server)->execute() or die $DBI::errstr;
 
 
-    my $s_sql_storage = $o_model->createSTORAGE;
+    my $s_sql_storage = $o_storage->createSTORAGE;
     $dbh->prepare( $s_sql_storage)->execute() or die $DBI::errstr;
 
 
-    my $s_sql_operation = $o_model->createOPERATION;
-    print "$s_sql_operation";
+    my $s_sql_operation = $o_operation->createOPERATION;
     $dbh->prepare( $s_sql_operation )->execute() or die $DBI::errstr;
 
 }
@@ -91,6 +94,7 @@ sub update {
     $$a_upwhere[1] = $dbh->quote($$a_upwhere[1]);
     #get sql
     my $s_updateSql = $o_DBsql->update_sql($_[0],$hr_field,$a_upwhere);
+    print $s_updateSql;
     #exec sql
     my $sth = $dbh->prepare( $s_updateSql );
     my $i_execResult = $sth->execute() or die $DBI::errstr;
