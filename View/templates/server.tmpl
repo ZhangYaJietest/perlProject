@@ -1,0 +1,103 @@
+<html lang="en">
+
+<head><title>VM Template</title>
+<script>
+    function click1(storage){
+        // var storage = document.getElementById("storage").innerHTML;
+        var url = "http://127.0.0.1:8080/storage.pl?"  + "storage=" + storage.innerHTML; //进行拼接传值
+
+        location.href=url;
+    }
+    function delete_date(name) {
+        // name = name.innerHTML;
+        var s_res = confirm("Are you sure to delete "+name.value);
+        if (s_res == true){
+            var url = "http://127.0.0.1:8080/delete.pl?"  + "name=" + name.value; //进行拼接传值
+            location.href=url;
+            console.log("delete");
+        }else{
+            console.log("no delete");
+        }
+
+    }
+</script>
+</head>
+<style>
+    label {
+        width: 100px;
+        text-align: right;
+        display: inline-block;
+    }
+    div.storage{
+        color:#0000FF;
+        text-decoration:underline;
+    }
+</style>
+<body bgcolor="">
+<div align="center">
+<h1>VM operation(ADD)</h1>
+<form action="http://127.0.0.1:8080/insert.pl" method=get>
+    <p>
+        <label for=""><TMPL_VAR NAME=HOME  /></label>
+        <input type="text" size=30 name="name" AutoComplete="off"  placeholder='Enter VM, eg:vm1' required>
+    </p>
+    <p>
+        <label for=""><TMPL_VAR NAME=STORAGENAME  /></label>
+<!--        <input type="text" size=30 name="storage" required>-->
+        <select name="storage" required style="width:230px;height: 25px;">
+            <TMPL_LOOP NAME="STORAGE_INFO">
+                <option value=<TMPL_VAR NAME="id" /> /><TMPL_VAR NAME="name" />
+            </TMPL_LOOP>
+        </select>
+    </p>
+    <p>
+        <label for=""><TMPL_VAR NAME=OPERATIN_SYATEM /></label>
+
+        <select name="operating_system" required style="width:230px;height: 25px;">
+            <option selected value="2"/>linux
+            <option value="3"/>WINDOWS
+            <option value="4"/>UNIX
+            <option value="5"/> MAC_OS
+        </select>
+    </p>
+
+    <input type=submit value="submit">
+    <input type=reset value="Clear">
+</form>
+</div>
+    <div align="left">
+    <form action="http://127.0.0.1:8080/server.pl" method=get>
+        <input type="text" size=30 name="name" AutoComplete="off"  placeholder='Enter VM, eg:vm1' required >
+        <input type=submit value="select">
+    </form>
+    </div>
+    <table  cellpadding="10" bgcolor="white" border="1">
+        <caption align="bottom">VM information</caption>
+        <tr>
+                <th>name</th>
+                <th>operating_system</th>
+                <th>storage</th>
+                <th>create_time</th>
+                <th>checksum</th>
+                <th>edit</th>
+        </tr>
+         <TMPL_LOOP NAME="SERVER_INFO">
+             <tr>
+                 <td><TMPL_VAR NAME="name" /></td>
+                 <td><TMPL_VAR NAME="operating_system" /></td>
+                 <td>
+                     <div class="storage" onclick="click1(this)"><TMPL_VAR NAME="storage" /></div>
+<!--                     <a href="" onclick="click1(this)"> <TMPL_VAR NAME="storage" />-->
+                     </a>
+                 </td>
+                 <td><TMPL_VAR NAME="create_time" /></td>
+                 <td><TMPL_VAR NAME="checksum" /></td>
+                 <td>
+                     <button class ='button' onclick="delete_date(this)" value=<TMPL_VAR NAME="name" />>delete</button>
+                     <button class ='button' onclick="" >update</button>
+                 </td>
+             </tr>
+         </TMPL_LOOP>
+    </table>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<html lang="en">
+
+<head><title>Storage Template</title></head>
+<body>
+<table  cellpadding="10" bgcolor="white" border="1">
+     <caption>VM information</caption>
+        <tr>
+                <th>id</th>
+                <th>name</th>
+                <th>capacity</th>
+                <th>create_time</th>
+                <th>edit</th>
+        </tr>
+         <TMPL_LOOP NAME="STORAGE_INFO">
+             <tr>
+                 <td><TMPL_VAR NAME="id" /></td>
+                 <td><TMPL_VAR NAME="name" /></td>
+                 <td><TMPL_VAR NAME="capacity" /></td>
+                 <td><TMPL_VAR NAME="create_time" /></td>
+                 <td>delete update</td>
+             </tr>
+         </TMPL_LOOP>
+</table>
+<a href="http://127.0.0.1:8080/server.pl"> back off</a>
+</body>
+
+</html>

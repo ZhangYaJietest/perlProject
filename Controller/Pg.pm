@@ -79,6 +79,41 @@ sub select {
     return \%h_tabledata;
 }
 
+sub Condition_query{
+    my $self = shift;
+    my $dbh = $self->{"DB"};
+    my $ar_param = shift;
+    my $tablename = $$ar_param[0];
+    my $s_sql = "";
+
+    my $o_DBsql = DBSql->new;
+    if ($$ar_param[1] eq ''){
+        $s_sql = $o_DBsql->Condition_query_sql($$ar_param[1]);
+    }else{
+        my $s_namevalue = $dbh->quote($$ar_param[1]);
+        $s_sql = $o_DBsql->Condition_query_sql($s_namevalue);
+    }
+    my $sth = $dbh->prepare( $s_sql );
+    $sth->execute() or die $DBI::errstr;
+    #Get table fields
+    my $o_jr = Judge->new;
+    my @a_field = $o_jr->get_field($tablename);
+    #
+    my %h_tabledata = ();
+    my $i_len = @a_field;
+    #deal data
+    my $i_count =1;
+    while(my @row = $sth->fetchrow_array()) {
+        my @a_data_single = ();
+        my %h_data_single = ();
+        for(my $len=0;$len<$i_len;$len++){
+            $h_data_single{$a_field[$len]} = $row[$len];
+        }
+        $h_tabledata{$i_count++} = \%h_data_single;
+    }
+    $self->{"con_data"} = \%h_tabledata;
+    return \%h_tabledata;
+}
 
 #tablename, field{}, where
 sub update {
@@ -94,7 +129,6 @@ sub update {
     $$a_upwhere[1] = $dbh->quote($$a_upwhere[1]);
     #get sql
     my $s_updateSql = $o_DBsql->update_sql($_[0],$hr_field,$a_upwhere);
-    print $s_updateSql;
     #exec sql
     my $sth = $dbh->prepare( $s_updateSql );
     my $i_execResult = $sth->execute() or die $DBI::errstr;
@@ -113,7 +147,6 @@ sub delete {
     #get detele sql
     my $o_DBsql = DBSql->new;
     my $s_deleteSql = $o_DBsql->delete_sql($_[0],$_[1],$dbh->quote($_[2]));
-    print $s_deleteSql;
     #exec sql
     my $sth = $dbh->prepare( $s_deleteSql );
     my $i_execResult = $sth->execute() or die $DBI::errstr;
@@ -139,7 +172,7 @@ sub insert {
     if (defined $tname){
         $i_rep = $o_jr->jrepeat($tname,$name);
         if ($i_rep == 0){
-            print "Data duplication";
+            # print "Data duplication";
             return 0;
         }
     }else{
@@ -154,7 +187,6 @@ sub insert {
     #get sql
     my $o_DBsql = DBSql->new;
     my $s_insertsql = $o_DBsql->insert_sql($tname,$hr_field);
-    print $s_insertsql;
     #exec sql
     my $sth = $dbh->prepare( $s_insertsql );
     my $i_execResult = $sth->execute() or die $DBI::errstr;
@@ -168,11 +200,11 @@ sub insert {
 
 sub display{
     my $self = shift;
-    my $s_data = $self->{"data"};
+    my $s_data = $self->{"con_data"};
     while((my $key1,my $value1)=each(%$s_data)){
         #The default is the name key
         while((my $key2,my $value2)=each(%$value1)){
-                print "$key2  $value2   ";
+            print "$key2  $value2   ";
         }
         print "\n";
     }

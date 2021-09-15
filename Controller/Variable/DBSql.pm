@@ -89,4 +89,23 @@ sub update_sql{
     return $s_updateSql;
 }
 
+sub Condition_query_sql{
+    my $self = shift;
+    my $s_name = $_[0];
+    my $s_cdsql ="";
+    if ($s_name eq ''){
+        $s_cdsql = "SELECT A.name,B.name as operating_system,C.name as storage,checksum,A.create_time
+         from server A,operation B,storage C
+	     where A.operating_system = B.id
+	     AND A.storage = C.id;";
+    }else{
+        $s_cdsql = "SELECT A.name,B.name as operating_system,C.name as storage,checksum,A.create_time
+         from server A,operation B,storage C
+	     where A.operating_system = B.id
+	     AND A.storage = C.id and A.name = " . $s_name ." ;";
+    }
+    return $s_cdsql;
+}
+
+
 1;
