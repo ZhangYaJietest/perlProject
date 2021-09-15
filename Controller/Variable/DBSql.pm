@@ -29,13 +29,13 @@ sub field_select{
 
 sub insert_sql{
     my $self = shift;
-    my $tname = $_[0];
-    my $field = $_[1];
+    my $s_tname = $_[0];
+    my $hr_field = $_[1];
     my $s_keysql = "(";
     my $s_valuesql = "(";
-    my $i_len = keys %$field;
+    my $i_len = keys %$hr_field;
     my $i_count = 1;
-    while((my $key,my $value)=each(%$field)){
+    while((my $key,my $value)=each(%$hr_field)){
         if ($i_count++<$i_len){
             $s_keysql .= $key .=",";
             $s_valuesql .= $value .=",";
@@ -46,7 +46,7 @@ sub insert_sql{
         }
     }
 
-    my $s_insertSql = "INSERT INTO ".$tname.$s_keysql." values".$s_valuesql.";";
+    my $s_insertSql = "INSERT INTO ".$s_tname.$s_keysql." values".$s_valuesql.";";
     return $s_insertSql;
 }
 

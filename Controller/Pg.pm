@@ -18,14 +18,14 @@ sub new{
 #Connect to database
 sub conn {
     my $self = shift;
-    my $driver = "Pg";
-    my $database = "perldatabase";
-    my $dsn = "DBI:$driver:dbname=$database;host=127.0.0.1;port=5432";
-    my $userid = "postgres";
-    my $password = "123456";
-    my $dbh = DBI->connect($dsn, $userid, $password, { RaiseError => 1 })
+    my $s_driver = "Pg";
+    my $s_database = "perldatabase";
+    my $s_dsn = "DBI:$s_driver:dbname=$s_database;host=127.0.0.1;port=5432";
+    my $s_userid = "postgres";
+    my $s_password = "123456";
+    my $h_dbh = DBI->connect($s_dsn, $s_userid, $s_password, { RaiseError => 1 })
         or die $DBI::errstr;
-    $self->{"DB"} = $dbh;
+    $self->{"DB"} = $h_dbh;
 
 }
 
@@ -53,15 +53,15 @@ sub select {
     my $self = shift;
 
     my $dbh = $self->{"DB"};
-    my $tablename = shift;
+    my $s_tablename = shift;
 
-    my $sql = "SELECT * from ".$tablename;
+    my $s_sql = "SELECT * from ".$s_tablename;
 
-    my $sth = $dbh->prepare( $sql );
+    my $sth = $dbh->prepare( $s_sql );
     $sth->execute() or die $DBI::errstr;
     #Get table fields
     my $o_jr = Judge->new;
-    my @a_field = $o_jr->get_field($tablename);
+    my @a_field = $o_jr->get_field($s_tablename);
 
     my %h_tabledata = ();
     my $i_len = @a_field;
@@ -83,7 +83,7 @@ sub Condition_query{
     my $self = shift;
     my $dbh = $self->{"DB"};
     my $ar_param = shift;
-    my $tablename = $$ar_param[0];
+    my $s_tablename = $$ar_param[0];
     my $s_sql = "";
 
     my $o_DBsql = DBSql->new;
@@ -97,7 +97,7 @@ sub Condition_query{
     $sth->execute() or die $DBI::errstr;
     #Get table fields
     my $o_jr = Judge->new;
-    my @a_field = $o_jr->get_field($tablename);
+    my @a_field = $o_jr->get_field($s_tablename);
     #
     my %h_tabledata = ();
     my $i_len = @a_field;
@@ -163,14 +163,14 @@ sub insert {
     my $self = shift;
     my $dbh = $self->{"DB"};
     #$_[0]:tablename $_[1]:\{name:,capacity:}
-    my $tname = $_[0];
+    my $s_tname = $_[0];
     my $hr_field = $_[1];
     my $o_jr = Judge->new;
-    my $name = qq($hr_field->{name});
+    my $s_name = qq($hr_field->{name});
     #Judgment repetition
     my $i_rep = 1;
-    if (defined $tname){
-        $i_rep = $o_jr->jrepeat($tname,$name);
+    if (defined $s_tname){
+        $i_rep = $o_jr->jrepeat($s_tname,$s_name);
         if ($i_rep == 0){
             # print "Data duplication";
             return 0;
@@ -186,7 +186,7 @@ sub insert {
     }
     #get sql
     my $o_DBsql = DBSql->new;
-    my $s_insertsql = $o_DBsql->insert_sql($tname,$hr_field);
+    my $s_insertsql = $o_DBsql->insert_sql($s_tname,$hr_field);
     #exec sql
     my $sth = $dbh->prepare( $s_insertsql );
     my $i_execResult = $sth->execute() or die $DBI::errstr;
