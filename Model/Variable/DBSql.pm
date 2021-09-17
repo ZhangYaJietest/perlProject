@@ -1,5 +1,5 @@
 package DBSql;
-use lib "C:/Users/142587/PycharmProjects/perlProject/Controller/";
+use lib "C:/Users/142587/PycharmProjects/perlProject/Model/";
 use strict;
 use warnings FATAL => 'all';
 use Judge;
@@ -37,7 +37,7 @@ sub insert_sql{
     my $i_count = 1;
     while((my $key,my $value)=each(%$hr_field)){
         if ($i_count++<$i_len){
-            $s_keysql .= $key .=",";
+           $s_keysql  .= $key .=",";
             $s_valuesql .= $value .=",";
 
         }else{
@@ -94,12 +94,12 @@ sub Condition_query_sql{
     my $s_name = $_[0];
     my $s_cdsql ="";
     if ($s_name eq ''){
-        $s_cdsql = "SELECT A.name,B.name as operating_system,C.name as storage,checksum,A.create_time
+        $s_cdsql = "SELECT A.name,B.name as operating_system,C.name as storage,checksum,A.update_time,A.create_time
          from server A,operation B,storage C
 	     where A.operating_system = B.id
 	     AND A.storage = C.id;";
     }else{
-        $s_cdsql = "SELECT A.name,B.name as operating_system,C.name as storage,checksum,A.create_time
+        $s_cdsql = "SELECT A.name,B.name as operating_system,C.name as storage,checksum,A.update_time,A.create_time
          from server A,operation B,storage C
 	     where A.operating_system = B.id
 	     AND A.storage = C.id and A.name = " . $s_name ." ;";

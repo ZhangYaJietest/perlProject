@@ -1,14 +1,64 @@
 <html lang="en">
 
-<head><title>Storage Template</title></head>
+<head><title>Storage Template</title>
+    <script>
+        function delete_data(id) {
+            // name = name.innerHTML;
+            var s_res = confirm("Are you sure you want to delete");
+            if (s_res == true){
+                var url = "http://127.0.0.1:8080/delete.pl?"  + "id=" + id.value; //进行拼接传值
+                location.href=url;
+                console.log("delete");
+            }else{
+                console.log("no delete");
+            }
+        }
+        function update_data(id) {
+        // name = name.innerHTML;
+        console.log(id.value);
+        var url = "http://127.0.0.1:8080/update.pl?"  + "id=" + id.value; //进行拼接传值
+        location.href=url;
+
+    }
+
+    </script>
+<style>
+    label {
+        width: 100px;
+        text-align: right;
+        display: inline-block;
+    }
+    div.storage{
+        color:#0000FF;
+        text-decoration:underline;
+    }
+    div.NameSelect{
+        position:relative;
+		left: 300px;
+    }
+    button.delete{
+        background-color: #f44336;
+        color: white;
+    }
+    button.update{
+        background-color: #008CBA;
+        color: white;
+    }
+</style>
+</head>
 <body>
+<TMPL_IF NAME="BOOL">
 <div align="center">
 <table  cellpadding="10" bgcolor="white" border="1">
-     <caption>STORAGE information</caption>
+        <tr>
+            <th colspan="6">Storage Information</th>
+        </tr>
         <tr>
                 <th>id</th>
                 <th>name</th>
                 <th>capacity</th>
+                <th>Capacity used</th>
+                <th>update_time</th>
                 <th>create_time</th>
         </tr>
          <TMPL_LOOP NAME="STORAGE_INFO">
@@ -16,12 +66,74 @@
                  <td><TMPL_VAR NAME="id" /></td>
                  <td><TMPL_VAR NAME="name" /></td>
                  <td><TMPL_VAR NAME="capacity" /></td>
+                 <td><TMPL_VAR NAME="usedcapacity" /></td>
+                 <td><TMPL_VAR NAME="update_time" /></td>
                  <td><TMPL_VAR NAME="create_time" /></td>
              </tr>
          </TMPL_LOOP>
 </table>
-<a href="http://127.0.0.1:8080/server.pl"> back off</a>
+<a href="http://127.0.0.1:8080/server.pl"> vm</a>
+<a href="http://127.0.0.1:8080/storage.pl"> storage</a>
 </div>
+    <TMPL_ELSE />
+
+        <div align="center">
+    <h1>Storage  Operation(ADD)</h1>
+    <form action="http://127.0.0.1:8080/insert.pl" method=get>
+        <p>
+            <label for=""><TMPL_VAR NAME=HOME  /></label>
+            <input type="text" size=30 name="name" AutoComplete="off"  placeholder='Enter sto, eg:sto11' required>
+        </p>
+        <p>
+            <label for=""><TMPL_VAR NAME=CAPACITY  /></label>
+            <input type="text" size=30 name="capacity" AutoComplete="off"
+                   required
+                   onkeyup="value=value.replace(/[^\d]/g,'')
+                   "onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^\d]/g,''))">
+        </p>
+
+        <input type=submit value="create">
+        <input type=reset value="Clear">
+    </form>
+    </div>
+        <div align="center">
+            <div  align="left" class="NameSelect">
+                <form action="http://127.0.0.1:8080/storage.pl" method=get>
+                    <input type="text" size=30 name="name" AutoComplete="off"  placeholder='Enter storage, eg:sto11' required >
+                    <input type=submit value="select">
+                </form>
+            </div>
+        <table  cellpadding="10" bgcolor="white" border="1">
+             <tr>
+            <th colspan="7">Storage Information</th>
+             </tr>
+            <tr>
+                    <th>id</th>
+                    <th>name</th>
+                    <th>capacity</th>
+                    <th>Capacity used</th>
+                    <th>update_time</th>
+                    <th>create_time</th>
+                    <th>edit</th>
+            </tr>
+             <TMPL_LOOP NAME="STORAGE_INFO">
+                 <tr>
+                     <td><TMPL_VAR NAME="id" /></td>
+                     <td><TMPL_VAR NAME="name" /></td>
+                     <td><TMPL_VAR NAME="capacity" /></td>
+                     <td><TMPL_VAR NAME="usedcapacity" /></td>
+                     <td><TMPL_VAR NAME="update_time" /></td>
+                     <td><TMPL_VAR NAME="create_time" /></td>
+                     <td>
+                         <button class ='update' onclick="update_data(this)" value=<TMPL_VAR NAME="id" />>update</button>
+                         <button class ='delete' onclick="delete_data(this)" value=<TMPL_VAR NAME="id" />>delete</button>
+                     </td>
+                 </tr>
+             </TMPL_LOOP>
+        </table>
+        </div>
+
+</TMPL_IF>
 </body>
 
 </html>

@@ -1,5 +1,5 @@
 #!C:/Strawberry/perl/bin/perl.exe
-use lib "C:/Users/142587/PycharmProjects/perlProject/Controller/";
+use lib "C:/Users/142587/PycharmProjects/perlProject/Model/";
 use strict;
 use warnings;
 use HTML::Template;

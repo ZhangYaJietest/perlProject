@@ -121,12 +121,35 @@ sub update {
     my $hr_field = $_[1];
     my $dbh = $self->{"DB"};
     my $o_DBsql = DBSql->new;
+
+    #Judgment repetition
+    my $o_jr = Judge->new;
+    my $i_rep = 1;
+    my $a_upwhere = $_[2];
+    if (defined $_[0]){
+        if ($hr_field->{name} ne $$a_upwhere[1]){
+            $i_rep = $o_jr->jrepeat($_[0],$hr_field->{name});
+            if ($i_rep == 0){
+                # print "Data duplication";
+                return 4;
+        }}
+    }else{
+        return 5;
+    }
+    #Determine whether naming is available
+    if ($_[0] eq 'server'){
+        return 8 ,if ($hr_field->{name} !~ /^(vm)/)
+    }else{
+        return 9 ,if ($hr_field->{name} !~ /^(sto)/)
+    }
     #deal Quotation marks
     while((my $key,my $value)=each(%$hr_field)){
         $$hr_field{$key} = ($dbh->quote($$hr_field{$key}));
     }
-    my $a_upwhere = $_[2];
+
     $$a_upwhere[1] = $dbh->quote($$a_upwhere[1]);
+
+
     #get sql
     my $s_updateSql = $o_DBsql->update_sql($_[0],$hr_field,$a_upwhere);
     #exec sql
@@ -136,17 +159,28 @@ sub update {
     if ($i_execResult <= 0){
         return 0;
     }else{
-        return 1;
+        return 7;
     }
 
 }
 
+#$_[0]:tablename     $_[1]:where key $_[2]:where value
 sub delete {
     my $self = shift;
     my $dbh = $self->{"DB"};
     #get detele sql
     my $o_DBsql = DBSql->new;
     my $s_deleteSql = $o_DBsql->delete_sql($_[0],$_[1],$dbh->quote($_[2]));
+    #storage Judge whether it can be deleted
+    my $i_DelRes = 1;
+    if ($_[0] eq 'storage'){
+        my @a_DeleteParams = ($_[0],$_[1],$_[2]);
+        my $o_jr = Judge->new;
+        $i_DelRes = $o_jr->delete_storage_data(\@a_DeleteParams);
+        if ($i_DelRes ne 1){
+            return $i_DelRes;
+        }
+    }
     #exec sql
     my $sth = $dbh->prepare( $s_deleteSql );
     my $i_execResult = $sth->execute() or die $DBI::errstr;
@@ -154,7 +188,7 @@ sub delete {
     if ($i_execResult <= 0){
         return 0;
     }else{
-        return 1;
+        return 3;
     }
 
 }
@@ -165,6 +199,12 @@ sub insert {
     #$_[0]:tablename $_[1]:\{name:,capacity:}
     my $s_tname = $_[0];
     my $hr_field = $_[1];
+    #Determine whether naming is available
+    if ($s_tname eq 'server'){
+        return 8 ,if ($hr_field->{name} !~ /^(vm)/)
+    }else{
+        return 9 ,if ($hr_field->{name} !~ /^(sto)/)
+    }
     my $o_jr = Judge->new;
     my $s_name = qq($hr_field->{name});
     #Judgment repetition
@@ -173,10 +213,10 @@ sub insert {
         $i_rep = $o_jr->jrepeat($s_tname,$s_name);
         if ($i_rep == 0){
             # print "Data duplication";
-            return 0;
+            return 4;
         }
     }else{
-        return 0;
+        return 5;
     }
     #deal Quotation marks
     while((my $key,my $value)=each(%$hr_field)){
@@ -194,7 +234,7 @@ sub insert {
     if ($i_execResult <= 0){
         return 0;
     }else{
-        return 1;
+        return 6;
     }
 }
 

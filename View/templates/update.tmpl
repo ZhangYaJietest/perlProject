@@ -1,0 +1,77 @@
+<html lang="en">
+
+<head><title>Storage Template</title>
+<style>
+    label {
+        width: 100px;
+        text-align: right;
+        display: inline-block;
+    }
+    div.enter-in-center{
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            -webkit-transform: translate(-50%, -50%);
+            -moz-transform: translate(-50%, -50%);
+            -ms-transform: translate(-50%, -50%);
+            -o-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+        }
+
+</style>
+</head>
+<body>
+<div class="enter-in-center">
+    <TMPL_IF NAME="BOOL">
+<form action="http://127.0.0.1:8080/updateServer.pl" method=get>
+    <p>
+        <label for=""><TMPL_VAR NAME=HOME  /></label>
+        <input type="hidden" name="wherename" value=<TMPL_VAR NAME=HOSTNAME  />>
+        <input type="text" size=30 name="name" AutoComplete="off"  value=<TMPL_VAR NAME=HOSTNAME  /> required>
+    </p>
+    <p>
+        <label for=""><TMPL_VAR NAME=STORAGENAME  /></label>
+<!--        <input type="text" size=30 name="storage" required>-->
+        <select name="storage" required style="width:230px;height: 25px;">
+            <TMPL_LOOP NAME="STORAGE_INFO">
+                <option value=<TMPL_VAR NAME="id" /> /><TMPL_VAR NAME="name" />
+            </TMPL_LOOP>
+        </select>
+    </p>
+    <p>
+        <label for=""><TMPL_VAR NAME=OPERATIN_SYATEM /></label>
+
+        <select name="operating_system" required style="width:230px;height: 25px;">
+          <TMPL_LOOP NAME="OPERATION_INFO">
+                <option value=<TMPL_VAR NAME="id" /> /><TMPL_VAR NAME="name" />
+            </TMPL_LOOP>
+        </select>
+    </p>
+
+    <div></div>
+    <input type=submit value="update">
+    <input type=reset value="Clear">
+    <a href="http://127.0.0.1:8080/server.pl"> back off</a>
+</form>
+        <TMPL_ELSE />
+        <form action="http://127.0.0.1:8080/updateServer.pl" method=get>
+            <p>
+                <label for=""><TMPL_VAR NAME=STORAGENAME  /></label>
+                <input type="hidden" name="wherename" value=<TMPL_VAR NAME=STORAGEINFO  />>
+                <input type="text" size=30 name="name" AutoComplete="off"  value=<TMPL_VAR NAME=STORAGEINFO> required>
+             </p>
+            <p>
+                <label for=""><TMPL_VAR NAME=CAPACITY  /></label>
+                <input type="text" size=30 name="capacity" AutoComplete="off"  value=<TMPL_VAR NAME=CAPACITYINFO  /> required
+                onkeyup="value=value.replace(/[^\d]/g,'')
+                   "onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^\d]/g,''))">
+            </p>
+             <input type=submit value="update">
+             <input type=reset value="Clear">
+        </form>
+        <a href="http://127.0.0.1:8080/storage.pl"> back off</a>
+    </TMPL_IF>
+</div>
+</body>
+
+</html>

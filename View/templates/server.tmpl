@@ -1,18 +1,20 @@
-<html lang="en">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" /><title>VM Template</title></head>
 
-<head><title>VM Template</title>
 <script>
     function click1(storage){
         // var storage = document.getElementById("storage").innerHTML;
-        var url = "http://127.0.0.1:8080/storage.pl?"  + "storage=" + storage.innerHTML; //杩涜鎷兼帴浼犲��
+        var url = "http://127.0.0.1:8080/storage.pl?"  + "storage=" + storage.innerHTML; //进行拼接传值
 
         location.href=url;
     }
-    function delete_date(name) {
+    function delete_data(name) {
         // name = name.innerHTML;
         var s_res = confirm("Are you sure to delete "+name.value);
         if (s_res == true){
-            var url = "http://127.0.0.1:8080/delete.pl?"  + "name=" + name.value; //杩涜鎷兼帴浼犲��
+            var url = "http://127.0.0.1:8080/delete.pl?"  + "name=" + name.value; //进行拼接传值
             location.href=url;
             console.log("delete");
         }else{
@@ -20,8 +22,14 @@
         }
 
     }
+    function update_data(name) {
+        // name = name.innerHTML;
+        console.log(name.value);
+        var url = "http://127.0.0.1:8080/update.pl?"  + "name=" + name.value; //进行拼接传值
+        location.href=url;
+
+    }
 </script>
-</head>
 <style>
     label {
         width: 100px;
@@ -34,7 +42,7 @@
     }
     div.NameSelect{
         position:relative;
-		left: 255px;
+		left: 150px;
     }
     button.delete{
         background-color: #f44336;
@@ -84,34 +92,188 @@
                 <input type=submit value="select">
             </form>
         </div>
-    <table  cellpadding="10" bgcolor="white" border="1">
-        <caption align="bottom">VM information</caption>
+        <span id="spanFirstt">first</span> <span id="spanPret">previous</span> <span id="spanNextt">next</span> <span id="spanLastt">last</span> Page <span id="spanPageNumt"></span>/Total<span id="spanTotalPaget"></span>
+    <table  cellpadding="10" bgcolor="white" border="1" id="server">
+        <tr>
+            <th colspan="7">VM information</th>
+        </tr>
         <tr>
                 <th>name</th>
                 <th>operating_system</th>
                 <th>storage</th>
+                <th>update_time</th>
                 <th>create_time</th>
                 <th>checksum</th>
                 <th>edit</th>
         </tr>
+        <tbody id="serverbody">
          <TMPL_LOOP NAME="SERVER_INFO">
              <tr>
                  <td><TMPL_VAR NAME="name" /></td>
                  <td><TMPL_VAR NAME="operating_system" /></td>
                  <td>
                      <div class="storage" onclick="click1(this)"><TMPL_VAR NAME="storage" /></div>
-<!--                     <a href="" onclick="click1(this)"> <TMPL_VAR NAME="storage" />-->
                      </a>
                  </td>
                  <td><TMPL_VAR NAME="create_time" /></td>
+                 <td><TMPL_VAR NAME="update_time" /></td>
                  <td><TMPL_VAR NAME="checksum" /></td>
                  <td>
-                     <button class ='update' onclick="" >update</button>
-                     <button class ='delete' onclick="delete_date(this)" value=<TMPL_VAR NAME="name" />>delete</button>
+                     <button class ='update' onclick="update_data(this)" value=<TMPL_VAR NAME="name" />>update</button>
+                     <button class ='delete' onclick="delete_data(this)" value=<TMPL_VAR NAME="name" />>delete</button>
                  </td>
              </tr>
          </TMPL_LOOP>
+        </tbody>
     </table>
+
+    <span id="spanFirst">first</span>
+    <span id="spanPre">previous</span>
+    <span id="spanNext">next</span>
+    <span id="spanLast">last</span>
+    Page<span id="spanPageNum"></span>/Total<span id="spanTotalPage"></span>
     </div>
 </body>
+<script>
+
+var theTable = document.getElementById("serverbody");
+var totalPage = document.getElementById("spanTotalPage");
+var pageNum = document.getElementById("spanPageNum");
+
+var spanPre = document.getElementById("spanPre");
+var spanNext = document.getElementById("spanNext");
+var spanFirst = document.getElementById("spanFirst");
+var spanLast = document.getElementById("spanLast");
+
+var totalPaget = document.getElementById("spanTotalPaget");
+var pageNumt = document.getElementById("spanPageNumt");
+
+var spanPret = document.getElementById("spanPret");
+var spanNextt = document.getElementById("spanNextt");
+var spanFirstt = document.getElementById("spanFirstt");
+var spanLastt = document.getElementById("spanLastt");
+
+var numberRowsInTable = theTable.rows.length;
+console.log(numberRowsInTable);
+var pageSize = 4;
+var page = 1;
+
+//下一页
+function next(){
+
+    hideTable();
+
+    currentRow = pageSize * page;
+    maxRow = currentRow + pageSize;
+    if ( maxRow > numberRowsInTable ) maxRow = numberRowsInTable;
+    for ( var i = currentRow; i< maxRow; i++ ){
+        theTable.rows[i].style.display = '';
+    }
+    page++;
+
+    if ( maxRow == numberRowsInTable ) { nextText(); lastText(); }
+    showPage();
+    preLink();
+    firstLink();
+}
+
+//上一页
+function pre(){
+
+    hideTable();
+
+    page--;
+
+    currentRow = pageSize * page;
+    maxRow = currentRow - pageSize;
+    if ( currentRow > numberRowsInTable ) currentRow = numberRowsInTable;
+    for ( var i = maxRow; i< currentRow; i++ ){
+        theTable.rows[i].style.display = '';
+    }
+
+
+    if ( maxRow == 0 ){ preText(); firstText(); }
+    showPage();
+    nextLink();
+    lastLink();
+}
+
+//第一页
+function first(){
+    hideTable();
+    page = 1;
+    for ( var i = 0; i<pageSize; i++ ){
+        theTable.rows[i].style.display = '';
+    }
+    showPage();
+
+    preText();
+    nextLink();
+    lastLink();
+}
+
+//最后一页
+function last(){
+    hideTable();
+    page = pageCount();
+    currentRow = pageSize * (page - 1);
+    for ( var i = currentRow; i<numberRowsInTable; i++ ){
+        theTable.rows[i].style.display = '';
+    }
+    showPage();
+
+    preLink();
+    nextText();
+    firstLink();
+}
+
+function hideTable(){
+    for ( var i = 0; i<numberRowsInTable; i++ ){
+        theTable.rows[i].style.display = 'none';
+    }
+}
+
+function showPage(){
+    pageNum.innerHTML = page;
+    pageNumt.innerHTML = page;
+}
+
+//总共页数
+function pageCount(){
+    var count = 0;
+    if ( numberRowsInTable%pageSize != 0 ) count = 1;
+    return parseInt(numberRowsInTable/pageSize) + count;
+}
+
+//显示链接
+function preLink(){ spanPre.innerHTML = "<a href='javascript:pre();'>previous</a>"; spanPret.innerHTML = "<a href='javascript:pre();'>previous</a>";}
+function preText(){ spanPre.innerHTML = "previous"; spanPret.innerHTML = "previous"; }
+
+function nextLink(){ spanNext.innerHTML = "<a href='javascript:next();'>next</a>"; spanNextt.innerHTML = "<a href='javascript:next();'>next</a>";}
+function nextText(){ spanNext.innerHTML = "next"; spanNextt.innerHTML = "next";}
+
+function firstLink(){ spanFirst.innerHTML = "<a href='javascript:first();'>first</a>"; spanFirstt.innerHTML = "<a href='javascript:first();'>first</a>";}
+function firstText(){ spanFirst.innerHTML = "first"; spanFirstt.innerHTML = "first";}
+
+function lastLink(){ spanLast.innerHTML = "<a href='javascript:last();'>last</a>"; spanLastt.innerHTML = "<a href='javascript:last();'>last</a>";}
+function lastText(){ spanLast.innerHTML = "last"; spanLastt.innerHTML = "last";}
+
+//隐藏表格
+function hide(){
+    for ( var i = pageSize; i<numberRowsInTable; i++ ){
+        theTable.rows[i].style.display = 'none';
+    }
+
+    totalPage.innerHTML = pageCount();
+    pageNum.innerHTML = '1';
+
+    totalPaget.innerHTML = pageCount();
+    pageNumt.innerHTML = '1';
+
+    nextLink();
+    lastLink();
+}
+
+hide();
+</script>
 </html>

@@ -18,6 +18,7 @@ sub jrepeat{
     my $DB = Pg->new;
     $DB->conn;
     my $hr_tabledata = $DB->select($tablename);
+    my $i_count = 0;
     while((my $key1,my $value1)=each(%$hr_tabledata)){
         #The default is the name key
         while((my $key2,my $value2)=each(%$value1)){
@@ -27,14 +28,6 @@ sub jrepeat{
         }
     }
     return 1;
-
-    # my $sth = $DB->select($tablename);
-    # while(my @row = $sth->fetchrow_array()) {
-    #     print "ID = ". $row[0] . "\n";
-    #     print "NAME = ". $row[1] ."\n";
-    #     print "ADDRESS = ". $row[2] ."\n";
-    # }
-
 }
 
 sub get_field{
@@ -55,7 +48,19 @@ sub get_field{
     return @a_field;
 
 }
-sub dealdata{
-
+sub delete_storage_data{
+    my $self = shift;
+    my $ar_params = $_[0];
+    my $DB = Pg->new;
+    $DB->conn;
+    my $hr_ServerData = $DB->select('server');
+    while((my $key1,my $value1)=each(%$hr_ServerData)){
+        my $i_storage = $value1->{'storage'};
+        if($i_storage eq $$ar_params[2] ){
+            return 2;
+        }else{
+            return 1;
+        }
+    }
 }
 1;
