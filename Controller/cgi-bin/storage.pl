@@ -5,11 +5,12 @@ use warnings;
 use HTML::Template;
 use DBI;
 use Pg;
+use STORAGE;
 my $inputstring=$ENV{QUERY_STRING};
 my $template = HTML::Template->new(filename=>"C:/Users/142587/PycharmProjects/perlProject/View/templates/storage.tmpl");
-my $o_DB = Pg->new;
-$o_DB->conn;
-my $hr_data = $o_DB->select("storage");
+my $o_storage = STORAGE->new;
+$o_storage->conn;
+my $hr_data = $o_storage->select("storage");
 if(defined($inputstring)){
     (my $key, my $value) = split(/=/, $inputstring);
     if(defined($value)){
@@ -20,6 +21,10 @@ if(defined($inputstring)){
             my %row_data;
             if($value1->{'name'} eq $value){
                 while((my $key2,my $value2)=each(%$value1)){
+                    if($key2 eq 'create_time'){
+                        my @a_CreateTime= split('\.',$value2);
+                        $value2  = $a_CreateTime[0];
+                    }
                     $row_data{$key2}   = $value2;
             }
                 push(@loop_data, \%row_data);
@@ -31,9 +36,14 @@ if(defined($inputstring)){
         $template->param(CAPACITY => "CAPACITY*");
         $template->param(BOOL => 0);
         my @loop_data = ();
-        while((my $key1,my $value1)=each(%$hr_data)){
+        foreach my $key1(sort { $a <=> $b } keys %$hr_data){
             my %row_data;
+            my $value1 = %$hr_data{$key1};
             while((my $key2,my $value2)=each(%$value1)){
+                if($key2 eq 'create_time'){
+                    my @a_CreateTime= split('\.',$value2);
+                    $value2  = $a_CreateTime[0];
+                }
                 $row_data{$key2}   = $value2;
             }
             push(@loop_data, \%row_data);

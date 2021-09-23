@@ -94,18 +94,36 @@ sub Condition_query_sql{
     my $s_name = $_[0];
     my $s_cdsql ="";
     if ($s_name eq ''){
-        $s_cdsql = "SELECT A.name,B.name as operating_system,C.name as storage,checksum,A.update_time,A.create_time
+        $s_cdsql = "SELECT A.name,B.name as operating_system,C.name as storage,checksum,A.create_time,A.update_time
          from server A,operation B,storage C
 	     where A.operating_system = B.id
-	     AND A.storage = C.id;";
+	     AND A.storage = C.id order by name;";
     }else{
         $s_cdsql = "SELECT A.name,B.name as operating_system,C.name as storage,checksum,A.update_time,A.create_time
          from server A,operation B,storage C
 	     where A.operating_system = B.id
-	     AND A.storage = C.id and A.name = " . $s_name ." ;";
+	     AND A.storage = C.id and A.name like " . $s_name ." order by name;";
     }
     return $s_cdsql;
 }
 
+sub update_capacity{
+    my $self = shift;
+    my $i_id = $_[0];
+    my $s_cdsql = "update storage set usedcapacity =(select usedcapacity from storage where id = ".$i_id.")+10 where id=".$i_id.";";
+    return $s_cdsql;
+}
+sub selectBYid_sql{
+    my $self = shift;
+    my $i_id = $_[0];
+    my $s_cdsql = "select capacity,usedcapacity  from storage where id = ".$i_id.";";
+    return $s_cdsql;
+}
+sub selectBYname_sql{
+    my $self = shift;
+    my $s_name = $_[0];
+    my $s_cdsql = "select capacity,usedcapacity  from storage where name = ".$s_name.";";
+    return $s_cdsql;
+}
 
 1;

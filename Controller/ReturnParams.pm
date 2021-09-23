@@ -18,7 +18,9 @@ sub Params{
         "6","Data created successfully",
         "7","Data updated successfully",
         "8","The name of VM needs to start with VM or vm",
-        "9","The name of storage needs to start with STO or sto"
+        "9","The name of storage needs to start with STO or sto",
+        "10","The storage is full",
+        "11","The storage size should be larger than the storage used"
     );
     return \%h_return;
 

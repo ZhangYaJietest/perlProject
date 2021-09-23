@@ -8,19 +8,24 @@ use Digest::MD5 qw(md5 md5_hex md5_base64);
 use HTML::Template;
 use DBI;
 use Pg;
+use SERVER;
+use STORAGE;
 my $s_inputstring=$ENV{QUERY_STRING};
 # my $s_inputstring= "id=4";
 my $s_tname = 'server';
 my ($key,$value) = split(/=/, $s_inputstring);
+#delete data
+my $i_res = 1;
 if ($key eq 'id'){
     $s_tname = 'storage';
+    my $o_storage = STORAGE->new;
+    $o_storage->conn;
+    $i_res = $o_storage->delete($s_tname,$key,$value);
+}else{
+    my $o_server = SERVER->new;
+    $o_server->conn;
+    $i_res = $o_server->delete($s_tname,$key,$value);
 }
-#delete data
-my $o_DB = Pg->new;
-$o_DB->conn;
-
-
-my $i_res = $o_DB->delete($s_tname,$key,$value);
 
 my $template = HTML::Template->new(filename=>"C:/Users/142587/PycharmProjects/perlProject/View/templates/curd.tmpl");
 # if ($i_res eq 1){

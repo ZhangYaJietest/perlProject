@@ -3,11 +3,8 @@ use lib "C:/Users/142587/PycharmProjects/perlProject/Model/";
 use strict;
 use warnings;
 use HTML::Template;
-use DBI;
-use Pg;
-
-my $o_DB = Pg->new;
-$o_DB->conn;
+use STORAGE;
+use SERVER;
 
 
 # open the html template
@@ -16,7 +13,9 @@ my $template = HTML::Template->new(filename=>"C:/Users/142587/PycharmProjects/pe
 # fill in some parameters
 $template->param(HOME => "HOSTNAME*");
 #storage
-my $hr_data = $o_DB->select("storage");
+my $o_storage = STORAGE->new;
+$o_storage->conn;
+my $hr_data = $o_storage->select("storage");
 my @loop_data = ();
 while((my $key1,my $value1)=each(%$hr_data)){
     my %row_data;
@@ -45,13 +44,20 @@ if (defined($inputstring)){
     }
 }
 
-my $hr_data = $o_DB->Condition_query(\@a_param);
+my $o_server = SERVER->new;
+$o_server->conn;
+my $hr_data = $o_server->Condition_query(\@a_param);
 my @loop_data = ();
-while((my $key1,my $value1)=each(%$hr_data)){
+foreach my $key1(sort {lc($a) cmp lc($b)} keys %$hr_data){
     my %row_data;
-    while((my $key2,my $value2)=each(%$value1)){
-        # print "$key2  $value2 \n";
-        $row_data{$key2}   = $value2;
+    my $value1 = %$hr_data{$key1};
+    foreach my $key2 (keys %$value1){
+        if($key2 eq 'create_time'){
+            my @a_CreateTime= split('\.',$$value1{$key2});
+            $row_data{$key2}   = $a_CreateTime[0];
+        }else{
+            $row_data{$key2}   = $$value1{$key2};
+        }
     }
     push(@loop_data, \%row_data);
 }

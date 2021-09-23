@@ -6,9 +6,9 @@ use warnings;
 use ReturnParams;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
 use HTML::Template;
-use DBI;
-use Pg;
 use POSIX qw(strftime);
+use STORAGE;
+use SERVER;
 my $s_inputstring=$ENV{QUERY_STRING};
 
 # my $s_inputstring = "name=sto1&capacity=100";
@@ -24,24 +24,24 @@ foreach my $pair ( @s_key_value){
     $h_input{$key} = $s_value ; # Creating a hash
  }
 my $i_len = keys %h_input;
-if ($i_len == 3){
-    $h_input{'checksum'} = md5_hex($s_inputstring);
-}else{
-    $s_tname = "storage";
-}
 my $s_date = strftime "%Y-%m-%d %H:%M:%S", localtime;
 $h_input{'update_time'} =$s_date;
 #insert data
-
-my $DB = Pg->new;
-$DB->conn;
-my $i_res = $DB->insert($s_tname,\%h_input);
-my $template = HTML::Template->new(filename=>"C:/Users/142587/PycharmProjects/perlProject/View/templates/curd.tmpl");
-if ($i_res eq 1){
-    $template->param(RESULT => "Insert successful");
+my $i_res = 1;
+my $o_storage = STORAGE->new;
+$o_storage->conn;
+if ($i_len == 3){
+    $h_input{'checksum'} = md5_hex($s_inputstring);
+    my $o_server = SERVER->new;
+    $o_server->conn;
+    $i_res = $o_server->insert($s_tname,\%h_input);
 }else{
-    $template->param(RESULT => "Insert fail");
+    $s_tname = "storage";
+    $i_res = $o_storage->insert($s_tname,\%h_input);
 }
+
+
+my $template = HTML::Template->new(filename=>"C:/Users/142587/PycharmProjects/perlProject/View/templates/curd.tmpl");
 my $params = ReturnParams->new;
 my $s_result = $params->Params->{$i_res};
 $template->param(RESULT => $s_result);

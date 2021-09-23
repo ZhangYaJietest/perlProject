@@ -9,9 +9,10 @@ use HTML::Template;
 use DBI;
 use Pg;
 use POSIX qw(strftime);
+use STORAGE;
+use SERVER;
 
-my $o_DB = Pg->new;
-$o_DB->conn;
+
 my $s_inputstring=$ENV{QUERY_STRING};
 # my $s_inputstring="name=vm40&storage=4&operating_system=4&wherename=vm4";
 # my $s_inputstring = "wherename=sto3&name=sto3&capacity=300";
@@ -33,11 +34,13 @@ foreach my $pair ( @a_key_value){
     }
  }
 #get tablename
+my $o_server = SERVER->new;
+$o_server->conn;
 my $s_tname = "storage";
 if($i_len eq 4){
     $s_tname = "server";
     #get checksum
-    my $hr_data = $o_DB->select($s_tname);
+    my $hr_data = $o_server->select($s_tname);
     while((my $key1,my $value1)=each(%$hr_data)){
         if($value1->{'name'} eq $a_Where[1]){
             $h_input{'checksum'} = $value1->{'checksum'};
@@ -48,9 +51,21 @@ if($i_len eq 4){
 my $s_date = strftime "%Y-%m-%d %H:%M:%S", localtime;
 $h_input{'update_time'} =$s_date;
 #update data
+my $i_res = 1;
+if($i_len eq 4){
+    $i_res = $o_server->update($s_tname,\%h_input,\@a_Where);
+}else{
+    my $o_storage = STORAGE->new;
+    $o_storage->conn;
+    my @a_row = $o_storage->selectBYname($a_Where[1]);
+    if($a_row[1] > $h_input{'capacity'}){
+        $i_res=11;
+    }
+    if ($i_res eq 1){
+        $i_res = $o_storage->update($s_tname,\%h_input,\@a_Where);
+    }
+}
 
-
-my $i_res = $o_DB->update($s_tname,\%h_input,\@a_Where);
 my $template = HTML::Template->new(filename=>"C:/Users/142587/PycharmProjects/perlProject/View/templates/curd.tmpl");
 my $params = ReturnParams->new;
 my $s_result = $params->Params->{$i_res};

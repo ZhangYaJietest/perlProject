@@ -4,16 +4,16 @@ use strict;
 use warnings;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
 use HTML::Template;
-use DBI;
-use Pg;
+use STORAGE;
+use OPERATION;
 
-my $o_DB = Pg->new;
-$o_DB->conn;
 my $inputstring=$ENV{QUERY_STRING};
 # my $inputstring="id=9";
 (my $key, my $value) = split(/=/, $inputstring);
 # print "$key  $value";
-my $hr_data = $o_DB->select("storage");
+my $o_storage = STORAGE->new;
+$o_storage->conn;
+my $hr_data = $o_storage->select("storage");
 my $template = HTML::Template->new(filename=>"C:/Users/142587/PycharmProjects/perlProject/View/templates/update.tmpl");
 #update server
 if ($key eq 'name'){
@@ -39,7 +39,9 @@ if ($key eq 'name'){
     #OPERATIN_SYATEM
     $template->param(OPERATIN_SYATEM => "OS*");
 
-    my $hr_data = $o_DB->select("operation");
+    my $o_operation = OPERATION->new;
+    $o_operation->conn;
+    my $hr_data = $o_operation->select("operation");
     my @loop_data = ();
     while((my $key1,my $value1)=each(%$hr_data)){
         my %row_data;

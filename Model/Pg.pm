@@ -26,6 +26,7 @@ sub conn {
     my $h_dbh = DBI->connect($s_dsn, $s_userid, $s_password, { RaiseError => 1 })
         or die $DBI::errstr;
     $self->{"DB"} = $h_dbh;
+    return $h_dbh;
 
 }
 
@@ -55,7 +56,7 @@ sub select {
     my $dbh = $self->{"DB"};
     my $s_tablename = shift;
 
-    my $s_sql = "SELECT * from ".$s_tablename;
+    my $s_sql = "SELECT * from ".$s_tablename." order by name";
 
     my $sth = $dbh->prepare( $s_sql );
     $sth->execute() or die $DBI::errstr;
@@ -73,7 +74,11 @@ sub select {
         for(my $len=0;$len<$i_len;$len++){
             $h_data_single{$a_field[$len]} = $row[$len];
         }
-        $h_tabledata{$i_count++} = \%h_data_single;
+        if(defined($h_data_single{id})){
+            $h_tabledata{$h_data_single{id}} = \%h_data_single;
+        }else{
+            $h_tabledata{$h_data_single{name}} = \%h_data_single;
+        }
     }
     $self->{"data"} = \%h_tabledata;
     return \%h_tabledata;
@@ -90,7 +95,7 @@ sub Condition_query{
     if ($$ar_param[1] eq ''){
         $s_sql = $o_DBsql->Condition_query_sql($$ar_param[1]);
     }else{
-        my $s_namevalue = $dbh->quote($$ar_param[1]);
+        my $s_namevalue = $dbh->quote('%'.$$ar_param[1].'%');
         $s_sql = $o_DBsql->Condition_query_sql($s_namevalue);
     }
     my $sth = $dbh->prepare( $s_sql );
@@ -109,9 +114,9 @@ sub Condition_query{
         for(my $len=0;$len<$i_len;$len++){
             $h_data_single{$a_field[$len]} = $row[$len];
         }
-        $h_tabledata{$i_count++} = \%h_data_single;
+        $h_tabledata{$h_data_single{name}} = \%h_data_single;
     }
-    $self->{"con_data"} = \%h_tabledata;
+    $self->{"data"} = \%h_tabledata;
     return \%h_tabledata;
 }
 
@@ -193,6 +198,7 @@ sub delete {
 
 }
 
+
 sub insert {
     my $self = shift;
     my $dbh = $self->{"DB"};
@@ -201,9 +207,9 @@ sub insert {
     my $hr_field = $_[1];
     #Determine whether naming is available
     if ($s_tname eq 'server'){
-        return 8 ,if ($hr_field->{name} !~ /^(vm)/)
+        return 8 ,if ($hr_field->{name} !~ /^(vm)/);
     }else{
-        return 9 ,if ($hr_field->{name} !~ /^(sto)/)
+        return 9 ,if ($hr_field->{name} !~ /^(sto)/);
     }
     my $o_jr = Judge->new;
     my $s_name = qq($hr_field->{name});
@@ -240,8 +246,11 @@ sub insert {
 
 sub display{
     my $self = shift;
-    my $s_data = $self->{"con_data"};
-    while((my $key1,my $value1)=each(%$s_data)){
+    # my $s_data = $self->{"con_data"};
+    my $s_data = $self->{"data"};
+    foreach my $key1(sort {lc($a) cmp lc($b)}  keys %$s_data){
+        my $value1 = %$s_data{$key1};
+        print $key1;
         #The default is the name key
         while((my $key2,my $value2)=each(%$value1)){
             print "$key2  $value2   ";

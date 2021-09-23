@@ -3,6 +3,7 @@ use strict;
 use warnings FATAL => 'all';
 use DBI;
 use Pg;
+use STORAGE;
 sub new{
     my $class = shift;
     my $ref={};
@@ -58,9 +59,10 @@ sub delete_storage_data{
         my $i_storage = $value1->{'storage'};
         if($i_storage eq $$ar_params[2] ){
             return 2;
-        }else{
-            return 1;
         }
     }
+    return 1;
 }
+
+
 1;

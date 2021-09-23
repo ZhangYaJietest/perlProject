@@ -1,6 +1,7 @@
 package OPERATION;
 use strict;
 use warnings FATAL => 'all';
+our @ISA=qw (Exporter Pg);
 sub new{
     my $class = shift;
     my $ref={};
