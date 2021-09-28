@@ -23,7 +23,7 @@
 <body>
 <div class="enter-in-center">
     <TMPL_IF NAME="BOOL">
-<form action="http://127.0.0.1:8080/updateServer.pl" method=get>
+<form action="http://127.0.0.1:8080/updatePost.pl" method=get>
     <p>
         <label for=""><TMPL_VAR NAME=HOME  /></label>
         <input type="hidden" name="wherename" value=<TMPL_VAR NAME=HOSTNAME  />>
@@ -54,7 +54,7 @@
     <a href="http://127.0.0.1:8080/server.pl"> back off</a>
 </form>
         <TMPL_ELSE />
-        <form action="http://127.0.0.1:8080/updateServer.pl" method=get>
+        <form action="http://127.0.0.1:8080/updatePost.pl" method=get>
             <p>
                 <label for=""><TMPL_VAR NAME=STORAGENAME  /></label>
                 <input type="hidden" name="wherename" value=<TMPL_VAR NAME=STORAGEINFO  />>

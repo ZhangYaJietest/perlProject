@@ -1,7 +1,8 @@
 package OPERATION;
 use strict;
 use warnings FATAL => 'all';
-our @ISA=qw (Exporter Pg);
+use BASE::base;
+our @ISA=qw (Exporter base);
 sub new{
     my $class = shift;
     my $ref={};
@@ -18,7 +19,7 @@ sub createOPERATION {
                        create_time timestamp default clock_timestamp (),
                        primary key(id)
                        ););
-    return $sql_operation;
+    base::create_table($sql_operation);
 }
 
 

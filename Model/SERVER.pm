@@ -1,20 +1,15 @@
 package SERVER;
 use strict;
 use warnings FATAL => 'all';
-use Pg;
-our @ISA=qw (Exporter Pg);
+use BASE::base;
+our @ISA=qw (Exporter base);
 sub new{
     my $class = shift;
     my $ref={};
     bless($ref);
     return $ref;
 }
-sub setServer{
-    my $self = shift;
-    print "\$self is a class ", ref($self)," reference.\n";
-    $self->{"Owner"} = shift;
-    $self->{"field"} = shift;
-}
+
 
 sub createSERVER {
     my $self = shift;
@@ -24,8 +19,10 @@ sub createSERVER {
                checksum varchar (10) NOT NULL,
                create_time timestamp default clock_timestamp ()
                ););
-    return $sql_server;
+    base::create_table($sql_server);
+    # base->create_table($sql_server);
 }
+
 sub insert {
     my $self = shift;
     my $dbh = $self->{"DB"};
@@ -49,7 +46,7 @@ sub insert {
     if ($s_tname eq 'server'){
         return 8 ,if ($hr_field->{name} !~ /^(vm)/);
         my $o_storage = STORAGE->new;
-        $o_storage->conn;
+        $o_storage->create_conn;
         #get capacity
         my @a_row = $o_storage->selectBYid($hr_field->{storage});
         if ($a_row[1]+10 > $a_row[0]){
@@ -81,5 +78,40 @@ sub insert {
     }
 }
 
+sub Condition_query{
+    my $self = shift;
+    my $dbh = $self->{"DB"};
+    my $ar_param = shift;
+    my $s_tablename = $$ar_param[0];
+    my $s_sql = "";
+
+    my $o_DBsql = DBSql->new;
+    if ($$ar_param[1] eq ''){
+        $s_sql = $o_DBsql->Condition_query_sql($$ar_param[1]);
+    }else{
+        my $s_namevalue = $dbh->quote('%'.$$ar_param[1].'%');
+        $s_sql = $o_DBsql->Condition_query_sql($s_namevalue);
+    }
+    my $sth = $dbh->prepare( $s_sql );
+    $sth->execute() or die $DBI::errstr;
+    #Get table fields
+    my $o_jr = Judge->new;
+    my @a_field = $o_jr->get_field($s_tablename);
+    #
+    my %h_tabledata = ();
+    my $i_len = @a_field;
+    #deal data
+    my $i_count =1;
+    while(my @row = $sth->fetchrow_array()) {
+        my @a_data_single = ();
+        my %h_data_single = ();
+        for(my $len=0;$len<$i_len;$len++){
+            $h_data_single{$a_field[$len]} = $row[$len];
+        }
+        $h_tabledata{$h_data_single{name}} = \%h_data_single;
+    }
+    $self->{"data"} = \%h_tabledata;
+    return \%h_tabledata;
+}
 
 1;

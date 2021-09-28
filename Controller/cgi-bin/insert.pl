@@ -12,16 +12,16 @@ use SERVER;
 my $s_inputstring=$ENV{QUERY_STRING};
 
 # my $s_inputstring = "name=sto1&capacity=100";
-my @s_key_value=split(/&/,$s_inputstring);
+my @a_key_value=split(/&/,$s_inputstring);
 my %h_input = ();
 my $s_tname = "server";
-foreach my $pair ( @s_key_value){
-    (my $key, my $s_value) = split(/=/, $pair);
+foreach my $pair ( @a_key_value){
+    (my $s_key, my $s_value) = split(/=/, $pair);
     $s_value=~ s/%(..)/pack("C", hex($1))/ge;
     $s_value =~ s/\n/ /g;
     $s_value =~ s/\r//g;
     $s_value =~ s/\cM//g;
-    $h_input{$key} = $s_value ; # Creating a hash
+    $h_input{$s_key} = $s_value ; # Creating a hash
  }
 my $i_len = keys %h_input;
 my $s_date = strftime "%Y-%m-%d %H:%M:%S", localtime;
@@ -29,11 +29,11 @@ $h_input{'update_time'} =$s_date;
 #insert data
 my $i_res = 1;
 my $o_storage = STORAGE->new;
-$o_storage->conn;
+$o_storage->create_conn;
 if ($i_len == 3){
     $h_input{'checksum'} = md5_hex($s_inputstring);
     my $o_server = SERVER->new;
-    $o_server->conn;
+    $o_server->create_conn;
     $i_res = $o_server->insert($s_tname,\%h_input);
 }else{
     $s_tname = "storage";
@@ -41,9 +41,9 @@ if ($i_len == 3){
 }
 
 
-my $template = HTML::Template->new(filename=>"C:/Users/142587/PycharmProjects/perlProject/View/templates/curd.tmpl");
-my $params = ReturnParams->new;
-my $s_result = $params->Params->{$i_res};
-$template->param(RESULT => $s_result);
+my $o_template = HTML::Template->new(filename=>"C:/Users/142587/PycharmProjects/perlProject/View/templates/curd.tmpl");
+my $o_params = ReturnParams->new;
+my $s_result = $o_params->Params->{$i_res};
+$o_template->param(RESULT => $s_result);
 
-print "Content-Type: text/html\n\n", $template->output;
+print "Content-Type: text/html\n\n", $o_template->output;

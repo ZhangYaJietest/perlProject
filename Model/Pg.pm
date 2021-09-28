@@ -4,7 +4,7 @@ use warnings FATAL => 'all';
 use lib "C:/Users/142587/PycharmProjects/perlProject/Model/";
 use DBI;
 use Judge;
-use Variable::DBSql;
+use BASE::DBSql;
 use SERVER;
 use STORAGE;
 use OPERATION;
@@ -34,28 +34,15 @@ sub conn {
 sub create {
     my $self = shift;
     my $dbh = $self->{"DB"};
-    my $o_model= SERVER->new;
-    my $o_storage = STORAGE->new;
-    my $o_operation = OPERATION->new;
-
-    my $s_sql_server = $o_model->createSERVER;
-    $dbh->prepare( $s_sql_server)->execute() or die $DBI::errstr;
-
-
-    my $s_sql_storage = $o_storage->createSTORAGE;
-    $dbh->prepare( $s_sql_storage)->execute() or die $DBI::errstr;
-
-
-    my $s_sql_operation = $o_operation->createOPERATION;
-    $dbh->prepare( $s_sql_operation )->execute() or die $DBI::errstr;
+    my $s_create_sql = $_[0];
+    $dbh->prepare( $s_create_sql)->execute() or die $DBI::errstr;
 
 }
 sub select {
     my $self = shift;
 
     my $dbh = $self->{"DB"};
-    my $s_tablename = shift;
-
+    my $s_tablename = $_[0];
     my $s_sql = "SELECT * from ".$s_tablename." order by name";
 
     my $sth = $dbh->prepare( $s_sql );
@@ -246,7 +233,6 @@ sub insert {
 
 sub display{
     my $self = shift;
-    # my $s_data = $self->{"con_data"};
     my $s_data = $self->{"data"};
     foreach my $key1(sort {lc($a) cmp lc($b)}  keys %$s_data){
         my $value1 = %$s_data{$key1};
